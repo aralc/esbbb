@@ -32,10 +32,7 @@ echo -e "\033[3;31m EMAIL COPIA ENVIO $mail2 \033[0m"
 echo -e "\033[3;31m EMPRESAS CONFIGURADAS :
 	$empresa1 -- destino $destino1 
 	$empresa2 -- destino $destino2 \033[0m"
-echo $db
-echo $table
-echo $user
-read a 
+
 
 #funcoes
 	monitor()
@@ -49,6 +46,27 @@ read a
 			sleep 5
 		}	
 
+	processar()
+		{
+		data=$(date +'%Y%m%d')
+		
+			echo "$data - Arquivo $i -- processo $cont" >> $log
+			echo "Este email é automatico. Nota fiscal $nf enviada" | mutt -s "Nota Fiscal Eletronica $nf" $mail1 -c $mail2 -a $1
+
+
+
+mysql -u $user -pbankai -e "insert into tbNotas(cnpj,numero_nota,DataNota,DataArmazenamento,ConteudoXml) values ('$cnpj',$nf,$data,$data,'$(cat $1)')" $db 
+			echo "$cnpj Nota Fiscal numero : $nf sendo processada" >> $log
+			echo "Email nota fiscal $nf Enviado" >> $log
+			echo "Movendo arquivo $1 - $cnpj" >> $log
+
+		nome=$(echo $1 | cut -d "/" -f 9)
+		mv $1 ${destino1}${data}'_'${nf}'_'${nome}".xml"
+			echo "Arquivo movido" >> $log
+		echo "+-------------------------------------------------------------------------+" >> $log
+		}
+
+
 	searchdestroy()
 			{
 			for ((loop=1 ; loop > 0 ; loop++))
@@ -57,24 +75,13 @@ read a
 			search=$(find $DirBusca -type f -name "*.xml")
 				for i in $search 
 				do 
-				echo "Arquivo $i -- processo $cont" >> $log
 				nf=$(cat $i | grep -e "<nNF>"  | awk -F "<nNF>" '{print $2-$3}')
 				cnpj=$(cat $i | awk -F "<dest>" '{print $2}' | awk -F "</dest>" '{print $1}' | awk -F "<CNPJ>" '{print $2}' | awk -F "</CNPJ>" '{print $1}')
-				echo "$cnpj Nota Fiscal numero : $nf sendo processada" >> $log
 				cont=$(expr 1 + $cont)
-				echo "Este email é automatico. Nota fiscal $nf enviada" | mutt -s "Nota Fiscal Eletronica $nf" $mail1 -c $mail2 -a $i 
-				echo "Email nota fiscal $nf Enviado" >> $log
-				data=$(date +'%d%m%y')
+
 					case $cnpj in 
 						$empresa1)
-						mysql -u $user -pbankai -e "insert into tbNotas(cnpj,numero_nota) values ('$cnpj',$nf)" $db							
-						echo "Movendo arquivo $i - $cnpj" >> $log
-						nome=$(echo $i | cut -d "/" -f 9)
-						mv $i ${destino1}${data}'_'${nf}'_'${nome}".xml"
-						echo "Arquivo movido" >> $log
-						echo "+-------------------------------------------------------------------------+" >> $log
-#						mysql -u $user -pbankai -e "insert into tbNotas(cnpj,numero_nota) values ('$cnpj',$nf)" $db
-						
+							processar $i
 							;;
 								$empresa2) 
 							echo "Movendo arquivo $i - $cnpj" >> $log
