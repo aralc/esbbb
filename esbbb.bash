@@ -67,12 +67,13 @@ read a
 				data=$(date +'%d%m%y')
 					case $cnpj in 
 						$empresa1)
+						mysql -u $user -pbankai -e "insert into tbNotas(cnpj,numero_nota) values ('$cnpj',$nf)" $db							
 						echo "Movendo arquivo $i - $cnpj" >> $log
 						nome=$(echo $i | cut -d "/" -f 9)
 						mv $i ${destino1}${data}'_'${nf}'_'${nome}".xml"
 						echo "Arquivo movido" >> $log
 						echo "+-------------------------------------------------------------------------+" >> $log
-						mysql -u $user -pbankai -e "insert into tbNotas(cnpj,numero_nota) values ('$cnpj',$nf)" $db
+#						mysql -u $user -pbankai -e "insert into tbNotas(cnpj,numero_nota) values ('$cnpj',$nf)" $db
 						
 							;;
 								$empresa2) 
