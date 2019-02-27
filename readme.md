@@ -7,5 +7,5 @@ A pos a busca o mesmo faz leitura do conteudo conforme estabelcido no fonte e o 
 Faz o envio de email informando sobre o processo e anexando o arquivo.
 Armazena os dados em banco de dados mysql 
 
-Atualmente foi desolvido para tratar xml de notas fiscais.
+Desenvolvido para tratar xml de notas fiscais.
 ######################################################################
